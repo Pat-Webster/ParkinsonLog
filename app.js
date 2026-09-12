@@ -266,34 +266,57 @@ function displayEntries() {
                     ? symptoms.join("<br>")
                     : "No symptom ratings entered";
 
+        let weatherText = "";
 
-            div.innerHTML = `
-                <strong>
-                    ${entry.date}
-                    ${entry.time}
-                </strong>
+        if (entry.weather) {
 
+            weatherText = `
                 <br><br>
 
-                ${symptomText}
+                Weather:<br>
 
-                <br><br>
+                Temperature:
+                ${entry.weather.temperatureF} °F<br>
 
-                DBS Program:
-                ${entry.dbsProgram || "Not entered"}
+                Humidity:
+                ${entry.weather.humidity}%<br>
 
-                <br>
+                Dew Point:
+                ${entry.weather.dewPointF} °F<br>
 
-                DBS Level:
-                ${entry.dbsLevel || "Not entered"}
-
-                ${
-                    entry.notes
-                        ? `<br><br>Notes: ${entry.notes}`
-                        : ""
-                }
+                Surface Pressure:
+                ${entry.weather.pressureHpa} hPa
             `;
+        }
+div.innerHTML = `
 
+    <strong>
+        ${entry.date}
+        ${entry.time}
+    </strong>
+
+    <br><br>
+
+    ${symptomText}
+
+    <br><br>
+
+    DBS Program:
+    ${entry.dbsProgram || "Not entered"}
+
+    <br>
+
+    DBS Level:
+    ${entry.dbsLevel || "Not entered"}
+
+    ${weatherText}
+
+    ${
+        entry.notes
+            ? `<br><br>Notes: ${entry.notes}`
+            : ""
+    }
+`;
 
             entryList.appendChild(div);
         }
@@ -301,8 +324,32 @@ function displayEntries() {
 }
 
 
-function saveEntry() {
+async function saveEntry() {
         alert("Saving Entry");
+let weather = null;
+
+    try {
+
+        const location =
+            await getCurrentPosition();
+
+
+        weather =
+            await getWeatherForObservation(
+                location.latitude,
+                location.longitude,
+                entryDate.value,
+                entryTime.value
+            );
+
+    }
+    catch (error) {
+
+        console.log(
+            "Weather unavailable:",
+            error
+        );
+    }
     const entry = {
 
         date:
@@ -359,7 +406,8 @@ function saveEntry() {
             dbsLevel.value,
 
         notes:
-            notes.value.trim()
+            notes.value.trim(),
+            weather: weather
     };
 
     entryDate.addEventListener(
@@ -1367,4 +1415,145 @@ if ("serviceWorker" in navigator) {
             );
         }
     );
+}
+function getCurrentPosition() {
+
+    return new Promise(
+        function (resolve, reject) {
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+
+                    resolve({
+                        latitude:
+                            position.coords.latitude,
+
+                        longitude:
+                            position.coords.longitude
+                    });
+                },
+
+                function (error) {
+
+                    reject(error);
+                }
+            );
+        }
+    );
+}
+async function getWeatherForObservation(
+    latitude,
+    longitude,
+    date,
+    time
+) {
+
+    const url =
+        "https://api.open-meteo.com/v1/forecast" +
+
+        `?latitude=${latitude}` +
+
+        `&longitude=${longitude}` +
+
+        "&hourly=" +
+        "temperature_2m," +
+        "relative_humidity_2m," +
+        "dew_point_2m," +
+        "surface_pressure" +
+
+        "&temperature_unit=fahrenheit" +
+
+        "&timezone=auto" +
+
+        `&start_date=${date}` +
+
+        `&end_date=${date}`;
+
+
+    const response =
+        await fetch(url);
+
+
+    if (!response.ok) {
+        throw new Error(
+            "Weather request failed"
+        );
+    }
+
+
+    const data =
+        await response.json();
+
+
+    const observationTime =
+        new Date(
+            `${date}T${time}`
+        );
+
+
+    let closestIndex = 0;
+
+    let closestDifference =
+        Infinity;
+
+
+    data.hourly.time.forEach(
+        function (weatherTime, index) {
+
+            const t =
+                new Date(weatherTime);
+
+            const difference =
+                Math.abs(
+                    t - observationTime
+                );
+
+
+            if (
+                difference <
+                closestDifference
+            ) {
+
+                closestDifference =
+                    difference;
+
+                closestIndex =
+                    index;
+            }
+        }
+    );
+
+
+    return {
+
+        temperatureF:
+            data.hourly
+                .temperature_2m[
+                    closestIndex
+                ],
+
+        humidity:
+            data.hourly
+                .relative_humidity_2m[
+                    closestIndex
+                ],
+
+        dewPointF:
+            data.hourly
+                .dew_point_2m[
+                    closestIndex
+                ],
+
+        pressureHpa:
+            data.hourly
+                .surface_pressure[
+                    closestIndex
+                ],
+
+        weatherTime:
+            data.hourly
+                .time[
+                    closestIndex
+                ]
+    };
 }
