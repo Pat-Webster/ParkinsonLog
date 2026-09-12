@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#f3f4f6">
+
+    <title>Parkinson's Log</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+        <h1>Parkinson's / DBS Log</h1>
+
+
+
+<section class="card">
+
+    <h2>Symptoms</h2>
+
+    <div class="sliderRow">
+        <label for="overallSymptoms">
+            Overall Parkinson's
+        </label>
+        <input type="range"
+               id="overallSymptoms"
+               min="0" max="10"
+               value="5" step="1">
+        <span id="overallSymptomsValue">5</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="tremor">
+            Tremor
+        </label>
+        <input type="range"
+               id="tremor"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="tremorValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="stiffness">
+            Stiffness / Rigidity
+        </label>
+        <input type="range"
+               id="stiffness"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="stiffnessValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="balance">
+            Walking / Balance
+        </label>
+        <input type="range"
+               id="balance"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="balanceValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="dyskinesia">
+            Dyskinesia
+        </label>
+        <input type="range"
+               id="dyskinesia"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="dyskinesiaValue">0</span>
+    </div>
+
+    <h2>Mood / Thinking</h2>
+
+    <div class="sliderRow">
+        <label for="depression">
+            Depression
+        </label>
+        <input type="range"
+               id="depression"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="depressionValue">0</span>
+    </div>
+
+    <div class="scaleDescription">
+        0 = feeling good &nbsp;&nbsp; 10 = extremely depressed
+    </div>
+
+    <div class="sliderRow">
+        <label for="anxiety">
+            Anxiety
+        </label>
+        <input type="range"
+               id="anxiety"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="anxietyValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="mentalFog">
+            Mental Fog
+        </label>
+        <input type="range"
+               id="mentalFog"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="mentalFogValue">0</span>
+    </div>
+
+    <div class="scaleDescription">
+        0 = completely clear &nbsp;&nbsp; 10 = extremely foggy
+    </div>
+
+    <div class="sliderRow">
+        <label for="indecisiveness">
+            Indecisiveness
+        </label>
+        <input type="range"
+               id="indecisiveness"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="indecisivenessValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="energy">
+            Energy
+        </label>
+        <input type="range"
+               id="energy"
+               min="0" max="10"
+               value="5" step="1">
+        <span id="energyValue">5</span>
+    </div>
+
+    <div class="scaleDescription">
+        0 = depleted &nbsp;&nbsp; 10 = highly energized
+    </div>
+
+</section>
+        <section class="card">
+
+            <h2>Entry</h2>
+
+            <div class="row">
+                <label for="entryDate">Date</label>
+                <input type="date" id="entryDate">
+            </div>
+
+            <div class="row">
+                <label for="entryTime">Time</label>
+                <input type="time" id="entryTime">
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>DBS</h2>
+
+            <div class="row">
+
+                <label for="dbsProgram">
+                    Program
+                </label>
+
+                <select id="dbsProgram">
+                    <option value="">Select</option>
+                    <option value="1">Program 1</option>
+                    <option value="2">Program 2</option>
+                    <option value="3">Program 3</option>
+                    <option value="4">Program 4</option>
+                </select>
+
+            </div>
+
+
+            <div class="row">
+
+                <label for="dbsLevel">
+                    Voltage / Amplitude
+                </label>
+
+                <input
+                    type="number"
+                    id="dbsLevel"
+                    min="0"
+                    step="0.1"
+                    placeholder="2.5"
+                >
+
+            </div>
+
+        </section>
+        
+        <button id="saveButton">
+            Save Entry
+        </button>
+
+<section class="card">
+
+    <h2>Medication</h2>
+
+    <div class="medRow">
+        <span>Carbidopa/Levodopa</span>
+
+        <button
+            type="button"
+            class="medButton"
+            data-medication="Carbidopa/Levodopa"
+        >
+            Took Now
+        </button>
+    </div>
+
+    <div class="medRow">
+        <span>Ropinirole</span>
+
+        <button
+            type="button"
+            class="medButton"
+            data-medication="Ropinirole"
+        >
+            Took Now
+        </button>
+    </div>
+<section class="card">
+
+    <h2>Sleep</h2>
+
+    <div class="row">
+        <button
+            type="button"
+            id="startSleepButton"
+        >
+            Start Sleep
+        </button>
+
+        <button
+            type="button"
+            id="wakeButton"
+        >
+            Wake Up
+        </button>
+    </div>
+
+    <div id="sleepStatus">
+        No active sleep session.
+    </div>
+
+    <div id="sleepList"></div>
+
+</section>
+<section class="card">
+
+    <h2>Timeline</h2>
+
+    <button
+        type="button"
+        id="refreshTimelineButton"
+    >
+        Refresh Timeline
+    </button>
+
+    <div id="timeline"></div>
+
+</section>
+</section>
+        <section class="card">
+
+            <label for="notes">
+                Notes
+            </label>
+
+            <textarea
+                id="notes"
+                rows="4"
+                placeholder="Anything you want to remember..."
+            ></textarea>
+
+        </section>
+
+<section class="card">
+
+    <h2>Symptom Graph</h2>
+
+    <div class="graphControls">
+
+        <select id="graphMetric">
+            <option value="overallSymptoms">
+                Overall Parkinson's
+            </option>
+
+            <option value="tremor">
+                Tremor
+            </option>
+
+            <option value="stiffness">
+                Stiffness / Rigidity
+            </option>
+
+            <option value="balance">
+                Walking / Balance
+            </option>
+
+            <option value="dyskinesia">
+                Dyskinesia
+            </option>
+
+            <option value="depression">
+                Depression
+            </option>
+
+            <option value="anxiety">
+                Anxiety
+            </option>
+
+            <option value="mentalFog">
+                Mental Fog
+            </option>
+
+            <option value="indecisiveness">
+                Indecisiveness
+            </option>
+
+            <option value="energy">
+                Energy
+            </option>
+        </select>
+
+    </div>
+
+    <canvas
+        id="symptomGraph"
+        width="600"
+        height="350">
+    </canvas>
+
+</section>
+
+
+        <section class="card">
+
+            <h2>Recent Entries</h2>
+
+            <div id="entryList">
+                No entries yet.
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="app.js"></script>
+
+</body>
+</html>
+```
