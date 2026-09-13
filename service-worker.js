@@ -1,5 +1,5 @@
 const CACHE_NAME =
-    "parkinsons-log-v1";
+    "parkinsons-log-v2";
 
 const FILES_TO_CACHE = [
     "./",
@@ -15,6 +15,8 @@ const FILES_TO_CACHE = [
 self.addEventListener(
     "install",
     function (event) {
+
+        self.skipWaiting();
 
         event.waitUntil(
             caches
@@ -33,18 +35,81 @@ self.addEventListener(
 
 
 self.addEventListener(
+    "activate",
+    function (event) {
+
+        event.waitUntil(
+
+            caches
+                .keys()
+                .then(
+                    function (cacheNames) {
+
+                        return Promise.all(
+
+                            cacheNames.map(
+                                function (name) {
+
+                                    if (
+                                        name !==
+                                        CACHE_NAME
+                                    ) {
+
+                                        return caches.delete(
+                                            name
+                                        );
+                                    }
+                                }
+                            )
+                        );
+                    }
+                )
+                .then(
+                    function () {
+
+                        return self.clients.claim();
+                    }
+                )
+        );
+    }
+);
+
+
+self.addEventListener(
     "fetch",
     function (event) {
 
         event.respondWith(
-            caches
-                .match(event.request)
+
+            fetch(event.request)
+
                 .then(
                     function (response) {
 
-                        return (
-                            response ||
-                            fetch(event.request)
+                        const copy =
+                            response.clone();
+
+                        caches
+                            .open(CACHE_NAME)
+                            .then(
+                                function (cache) {
+
+                                    cache.put(
+                                        event.request,
+                                        copy
+                                    );
+                                }
+                            );
+
+                        return response;
+                    }
+                )
+
+                .catch(
+                    function () {
+
+                        return caches.match(
+                            event.request
                         );
                     }
                 )
