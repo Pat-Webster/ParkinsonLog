@@ -1,5 +1,5 @@
 const CACHE_NAME =
-    "parkinsons-log-v2";
+    "parkinsons-log-v3";
 
 const FILES_TO_CACHE = [
     "./",

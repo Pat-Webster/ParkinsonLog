@@ -69,6 +69,14 @@ const symptomSliders = [
     "energy"
 ];
 
+if (
+    "Notification" in window &&
+    Notification.permission ===
+        "default"
+) {
+
+    Notification.requestPermission();
+}
 
 const ratedSymptoms = new Set();
 
@@ -451,6 +459,10 @@ saveButton.addEventListener(
     "click",
     saveEntry
 );
+//*****************************************************************
+// ------------------------------------
+// Medication
+// ------------------------------------
 
 function getMedicationEvents() {
 
@@ -471,48 +483,44 @@ function saveMedicationEvent(
     medication
 ) {
 
-    const now =
-        new Date();
+    const now = new Date();
 
     const event = {
+
         medication:
             medication,
 
         timestamp:
             now.toISOString(),
 
-        date:
-            now.toLocaleDateString(),
+         date:
+            entryDate.value,
 
         time:
-            now.toLocaleTimeString(
-                [],
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            )
+            entryTime.value,
+
     };
 
 
     const events =
         getMedicationEvents();
 
-
     events.push(event);
-
 
     localStorage.setItem(
         "parkinsonsMedicationEvents",
         JSON.stringify(events)
     );
 
-
     alert(
         `${medication} recorded at ${event.time}`
     );
 }
 
+
+// ------------------------------------
+// Medication button clicks
+// ------------------------------------
 
 document
     .querySelectorAll(".medButton")
@@ -529,10 +537,17 @@ document
                     saveMedicationEvent(
                         medication
                     );
+
+                    scheduleMedicationReminder(
+                        medication
+                    );
+
                 }
             );
         }
     );
+//***************************************************************************
+
 
 setCurrentDateTime();
 
@@ -1557,3 +1572,123 @@ async function getWeatherForObservation(
                 ]
     };
 }
+
+const clearButton =
+    document.getElementById(
+        "clearButton"
+    );
+function clearCurrentEntry() {
+
+    resetSymptomSliders();
+
+    notes.value = "";
+
+    saveButton.disabled = true;
+
+    setCurrentDateTime();
+}
+clearButton.addEventListener(
+    "click",
+    clearCurrentEntry
+);
+
+function scheduleMedicationReminder(
+    medication
+) {
+
+    const reminderTime =
+        Date.now() +
+        (3.5 * 60 * 60 * 1000);
+
+    const reminder = {
+
+        medication:
+            medication,
+
+        timestamp:
+            reminderTime
+    };
+
+
+    localStorage.setItem(
+        "medicationReminder",
+        JSON.stringify(reminder)
+    );
+
+
+    startMedicationTimer();
+}
+function startMedicationTimer() {
+
+    const saved =
+        localStorage.getItem(
+            "medicationReminder"
+        );
+
+
+    if (!saved) {
+        return;
+    }
+
+
+    const reminder =
+        JSON.parse(saved);
+
+
+    const delay =
+        reminder.timestamp -
+        Date.now();
+
+
+    if (delay <= 0) {
+
+        showMedicationReminder(
+            reminder.medication
+        );
+
+        return;
+    }
+
+
+    setTimeout(
+        function () {
+
+            showMedicationReminder(
+                reminder.medication
+            );
+
+        },
+        delay
+    );
+}
+function showMedicationReminder(
+    medication
+) {
+
+    if (
+        Notification.permission ===
+        "granted"
+    ) {
+
+        new Notification(
+            "Medication Reminder",
+            {
+                body:
+                    `Time for ${medication}`
+            }
+        );
+    }
+    else {
+
+        alert(
+            `Medication reminder: ${medication}`
+        );
+    }
+
+
+    localStorage.removeItem(
+        "medicationReminder"
+    );
+}
+
+startMedicationTimer();

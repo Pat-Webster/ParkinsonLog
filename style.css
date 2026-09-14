@@ -116,7 +116,7 @@ textarea {
     resize: vertical;
 }
 
-#saveButton {
+.entryButtons{
     width: 100%;
     padding: 16px;
 
@@ -140,7 +140,7 @@ textarea {
         transform 0.08s,
         box-shadow 0.08s;
 }
-#saveButton:active:not(:disabled) {
+.entryButtons:active:not(:disabled) {
 
     /* Move it downward */
     transform: translateY(3px);
@@ -149,14 +149,14 @@ textarea {
     box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.3);
 }
-#saveButton:disabled {
+entryButtons:disabled {
     opacity: 0.3;
     cursor: default;
 
     box-shadow:
         0 2px 3px rgba(0, 0, 0, 0.15);
 }
-#saveButton:active {
+.entryButtons:active {
     transform: scale(0.98);
 }
 
@@ -283,12 +283,12 @@ textarea {
 .sliderRow input[type="range"] {
     transition: opacity 0.2s;
 }
-#saveButton:disabled {
+.entryButtons:disabled {
     opacity: 0.3;
     cursor: default;
 }
 
-#saveButton:not(:disabled) {
+.entryButtons:not(:disabled) {
     opacity: 1;
     cursor: pointer;
 }
@@ -311,4 +311,21 @@ textarea {
     width: 100%;
     padding: 8px;
     font-size: 1rem;
+}
+.entryButtons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.entryButtons button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+}
+
+#clearButton {
+    background: #eeeeee;
+    border: 1px solid #00a;
 }

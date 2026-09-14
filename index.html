@@ -80,8 +80,6 @@
         <span id="dyskinesiaValue">0</span>
     </div>
 
-    <h2>Mood / Thinking</h2>
-
     <div class="sliderRow">
         <label for="depression">
             Depression
@@ -91,10 +89,6 @@
                min="0" max="10"
                value="0" step="1">
         <span id="depressionValue">0</span>
-    </div>
-
-    <div class="scaleDescription">
-        0 = feeling good &nbsp;&nbsp; 10 = extremely depressed
     </div>
 
     <div class="sliderRow">
@@ -119,10 +113,6 @@
         <span id="mentalFogValue">0</span>
     </div>
 
-    <div class="scaleDescription">
-        0 = completely clear &nbsp;&nbsp; 10 = extremely foggy
-    </div>
-
     <div class="sliderRow">
         <label for="indecisiveness">
             Indecisiveness
@@ -145,10 +135,6 @@
         <span id="energyValue">5</span>
     </div>
 
-    <div class="scaleDescription">
-        0 = depleted &nbsp;&nbsp; 10 = highly energized
-    </div>
-
 </section>
         <section class="card">
 
@@ -157,58 +143,28 @@
             <div class="row">
                 <label for="entryDate">Date</label>
                 <input type="date" id="entryDate">
-            </div>
-
-            <div class="row">
                 <label for="entryTime">Time</label>
                 <input type="time" id="entryTime">
             </div>
 
         </section>
+       
+<div class="entryButtons">
 
-        <section class="card">
+    <button
+        id="clearButton"
+        type="button">
+        Reset Entry
+    </button>
 
-            <h2>DBS</h2>
+    <button
+        id="saveButton"
+        type="button"
+        disabled>
+        Save Entry
+    </button>
 
-            <div class="row">
-
-                <label for="dbsProgram">
-                    Program
-                </label>
-
-                <select id="dbsProgram">
-                    <option value="">Select</option>
-                    <option value="1">Program 1</option>
-                    <option value="2">Program 2</option>
-                    <option value="3">Program 3</option>
-                    <option value="4">Program 4</option>
-                </select>
-
-            </div>
-
-
-            <div class="row">
-
-                <label for="dbsLevel">
-                    Voltage / Amplitude
-                </label>
-
-                <input
-                    type="number"
-                    id="dbsLevel"
-                    min="0"
-                    step="0.1"
-                    placeholder="2.5"
-                >
-
-            </div>
-
-        </section>
-        
-        <button id="saveButton">
-            Save Entry
-        </button>
-
+</div>
 <section class="card">
 
     <h2>Medication</h2>
@@ -236,6 +192,54 @@
             Took Now
         </button>
     </div>
+   <div class="medRow">
+        <span>Other</span>
+
+        <button
+            type="button"
+            class="medButton"
+            data-medication="Other"
+        >
+            Took Now
+        </button>
+    </div>
+
+        <section class="card">
+
+            <h2>DBS</h2>
+
+            <div class="row">
+
+                <label for="dbsProgram">
+                    Program
+                </label>
+
+                <select id="dbsProgram">
+                    <option value="">Select</option>
+                    <option value="1">Program 1</option>
+                    <option value="2">Program 2</option>
+                    <option value="3">Program 3</option>
+                    <option value="4">Program 4</option>
+                </select>
+
+
+                <label for="dbsLevel">
+                    Voltage / Amplitude
+                </label>
+
+                <input
+                    type="number"
+                    id="dbsLevel"
+                    min="0"
+                    step="0.1"
+                    placeholder="2.5"
+                >
+
+            </div>
+
+        </section>
+ 
+
 <section class="card">
 
     <h2>Sleep</h2>
@@ -261,20 +265,6 @@
     </div>
 
     <div id="sleepList"></div>
-
-</section>
-<section class="card">
-
-    <h2>Timeline</h2>
-
-    <button
-        type="button"
-        id="refreshTimelineButton"
-    >
-        Refresh Timeline
-    </button>
-
-    <div id="timeline"></div>
 
 </section>
 </section>
@@ -350,6 +340,20 @@
 
 </section>
 
+<section class="card">
+
+    <h2>Timeline</h2>
+
+    <button
+        type="button"
+        id="refreshTimelineButton"
+    >
+        Refresh Timeline
+    </button>
+
+    <div id="timeline"></div>
+
+</section>
 
         <section class="card">
 
