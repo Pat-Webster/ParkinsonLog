@@ -1,28 +1,55 @@
+// ====================================
+// DOM REFERENCES
+// ====================================
+
+// entryDate, entryTime, sliders,
+// buttons, graph canvas, etc.
 
 const entryDate = document.getElementById("entryDate");
 const entryTime = document.getElementById("entryTime");
+const overallSymptoms = document.getElementById("overallSymptoms");
+const overallSymptomsValue = document.getElementById("overallSymptomsValue");
+const dbsProgram = document.getElementById("dbsProgram");
+const dbsLevel = document.getElementById("dbsLevel");
+const notes = document.getElementById("notes");
+const saveButton = document.getElementById("saveButton");
+const entryList = document.getElementById("entryList");
+const startSleepButton = document.getElementById("startSleepButton");
+const wakeButton = document.getElementById("wakeButton");
+const sleepStatus = document.getElementById("sleepStatus");
+const sleepList = document.getElementById("sleepList");
+const timeline = document.getElementById("timeline");
+const refreshTimelineButton =  document.getElementById("refreshTimelineButton"   );
+const clearButton = document.getElementById("clearButton" );
+const dbsPulseWidth = document.getElementById("dbsPulseWidth"    );
+const dbsFrequency = document.getElementById("dbsFrequency" );
+const ratedSymptoms = new Set();
+const symptomSliders = [
+    "overallSymptoms",
+    "tremor",
+    "stiffness",
+    "balance",
+    "dyskinesia",
+    "dystonia",
+    "depression",
+    "anxiety",
+    "mentalFog",
+    "indecisiveness",
+    "energy",
+    "sleepiness"
+];
 
-const overallSymptoms =
-    document.getElementById("overallSymptoms");
 
-const overallSymptomsValue =
-    document.getElementById("overallSymptomsValue");
+if (
+    "Notification" in window &&
+    Notification.permission ===
+        "default"
+) {
 
-const dbsProgram =
-    document.getElementById("dbsProgram");
+    Notification.requestPermission();
+}
 
-const dbsLevel =
-    document.getElementById("dbsLevel");
-
-const notes =
-    document.getElementById("notes");
-
-const saveButton =
-    document.getElementById("saveButton");
-
-const entryList =
-    document.getElementById("entryList");
-
+// setCurrentDateTime()
 
 function setCurrentDateTime() {
 
@@ -54,127 +81,6 @@ function setCurrentDateTime() {
         `${hours}:${minutes}`;
 }
 
-    saveButton.disabled = true;
-
-const symptomSliders = [
-    "overallSymptoms",
-    "tremor",
-    "stiffness",
-    "balance",
-    "dyskinesia",
-    "depression",
-    "anxiety",
-    "mentalFog",
-    "indecisiveness",
-    "energy"
-];
-
-if (
-    "Notification" in window &&
-    Notification.permission ===
-        "default"
-) {
-
-    Notification.requestPermission();
-}
-
-const ratedSymptoms = new Set();
-
-symptomSliders.forEach(
-    function (id) {
-
-        const slider =
-            document.getElementById(id);
-
-        const valueDisplay =
-            document.getElementById(
-                id + "Value"
-            );
-
-        slider.value = 5;
-
-        slider.classList.add(
-            "unratedSlider"
-        );
-
-        valueDisplay.textContent = "—";
-
-        slider.addEventListener(
-            "input",
-            function () {
-
-                ratedSymptoms.add(id);
-
-                slider.classList.remove(
-                    "unratedSlider"
-                );
-
-                valueDisplay.textContent =
-                    slider.value;
-                saveButton.disabled = false;
-           }
-        );
-    }
-);
-
-
-function getRating(id) {
-
-    if (!ratedSymptoms.has(id)) {
-        return -1;
-    }
-
-    return Number(
-        document.getElementById(id).value
-    );
-}
-function getEntries() {
-
-    const savedEntries =
-        localStorage.getItem(
-            "parkinsonsLogEntries"
-        );
-
-    if (!savedEntries) {
-        return [];
-    }
-
-    return JSON.parse(savedEntries);
-}
-
-
-function saveEntries(entries) {
-
-    localStorage.setItem(
-        "parkinsonsLogEntries",
-        JSON.stringify(entries)
-    );
-}
-function resetSymptomSliders() {
-
-    ratedSymptoms.clear();
-
-    symptomSliders.forEach(
-        function (id) {
-
-            const slider =
-                document.getElementById(id);
-
-            const valueDisplay =
-                document.getElementById(
-                    id + "Value"
-                );
-
-            slider.value = 5;
-
-            slider.classList.add(
-                "unratedSlider"
-            );
-
-            valueDisplay.textContent = "—";
-        }
-    );
-}
 function displayEntries() {
 
     const entries = getEntries();
@@ -244,6 +150,11 @@ function displayEntries() {
             );
 
             addRating(
+                "Dystonia",
+                entry.dystonia
+            );
+
+            addRating(
                 "Depression",
                 entry.depression
             );
@@ -266,6 +177,11 @@ function displayEntries() {
             addRating(
                 "Energy",
                 entry.energy
+            );
+
+            addRating(
+                "Sleepiness",
+                entry.sleepiness
             );
 
 
@@ -330,11 +246,424 @@ div.innerHTML = `
         }
     );
 }
+    // --------------------------------
+    // Sleep
+    // --------------------------------
 
+    const sleepSessions =
+        getSleepSessions();
+
+    function displaySleep() {
+
+        const active =
+            getActiveSleepSession();
+
+
+        if (active) {
+
+            const start =
+                new Date(
+                    active.start
+                );
+
+            sleepStatus.textContent =
+                `Sleeping since ${formatTime(start)}`;
+        }
+        else {
+
+            sleepStatus.textContent =
+                "No active sleep session.";
+        }
+
+
+        const sessions =
+            getSleepSessions();
+
+
+        sleepList.innerHTML = "";
+
+
+        const newestFirst =
+            [...sessions].reverse();
+
+
+        newestFirst.forEach(
+            function (session) {
+
+                const start =
+                    new Date(
+                        session.start
+                    );
+
+                const end =
+                    new Date(
+                        session.end
+                    );
+
+                const duration =
+                    end - start;
+
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className =
+                    "sleepEntry";
+
+
+                div.innerHTML = `
+                    <strong>
+                        ${start.toLocaleDateString()}
+                    </strong>
+
+                    <br>
+
+                    ${formatTime(start)}
+                    →
+                    ${formatTime(end)}
+
+                    <br>
+
+                    Duration:
+                    ${formatDuration(duration)}
+                `;
+
+
+                sleepList.appendChild(
+                    div
+                );
+            }
+        );
+    }
+
+    sleepSessions.forEach(
+        function (sleep) {
+
+            const start =
+                new Date(
+                    sleep.start
+                );
+
+            const end =
+                new Date(
+                    sleep.end
+                );
+
+            events.push({
+
+                timestamp:
+                    start,
+
+                type:
+                    "SLEEP",
+
+                details:
+                    `${formatTime(start)}
+                     → ${formatTime(end)}
+                     (${formatDuration(end - start)})`
+            });
+        }
+    );
+
+    // ====================================
+// TIMELINE
+// ====================================
+
+// buildTimeline()
+
+function buildTimeline() {
+
+    let events = [];
+
+
+    // --------------------------------
+    // Symptom / DBS observations
+    // --------------------------------
+
+    const entries =
+        getEntries();
+
+    entries.forEach(
+        function (entry) {
+
+            const timestamp =
+                new Date(
+                    `${entry.date}T${entry.time}`
+                );
+
+            events.push({
+
+                timestamp:
+                    timestamp,
+
+                type:
+                    "SYMPTOMS / DBS",
+
+                details:
+                    `Symptoms: ${entry.overallSymptoms}/10
+                     — DBS Program: ${entry.dbsProgram || "-"}
+                     — Level: ${entry.dbsLevel || "-"}`
+            });
+        }
+    );
+        
+    dbsProgram.addEventListener(
+        "change",
+        function () {
+            saveButton.disabled = false;
+        }
+    );
+
+    notes.addEventListener(
+        "input",
+        function () {
+            saveButton.disabled = false;
+        }
+    );
+
+    dbsLevel.addEventListener(
+        "input",
+        function () {
+            saveButton.disabled = false;
+        }
+    );
+    // --------------------------------
+    // Medication
+    // --------------------------------
+
+    const medications =
+        getMedicationEvents();
+
+    medications.forEach(
+        function (med) {
+
+            events.push({
+
+                timestamp:
+                    new Date(
+                        med.timestamp
+                    ),
+
+                type:
+                    "MEDICATION",
+
+                details:
+                    med.medication
+            });
+        }
+    );
+
+
+    // --------------------------------
+    // Sleep
+    // --------------------------------
+
+    const sleepSessions =
+        getSleepSessions();
+
+    sleepSessions.forEach(
+        function (sleep) {
+
+            const start =
+                new Date(
+                    sleep.start
+                );
+
+            const end =
+                new Date(
+                    sleep.end
+                );
+
+            events.push({
+
+                timestamp:
+                    start,
+
+                type:
+                    "SLEEP",
+
+                details:
+                    `${formatTime(start)}
+                     → ${formatTime(end)}
+                     (${formatDuration(end - start)})`
+            });
+        }
+    );
+
+
+    // Newest event first
+
+    events.sort(
+        function (a, b) {
+
+            return (
+                b.timestamp -
+                a.timestamp
+            );
+        }
+    );
+
+
+    displayTimeline(events);
+}
+
+function displayTimeline(events) {
+
+    timeline.innerHTML = "";
+
+
+    if (events.length === 0) {
+
+        timeline.textContent =
+            "No events recorded yet.";
+
+        return;
+    }
+
+
+    events.forEach(
+        function (event) {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "timelineEntry";
+
+
+            const date =
+                event.timestamp;
+
+
+            div.innerHTML = `
+
+                <div class="timelineTime">
+
+                    ${date.toLocaleDateString()}
+
+                    ${date.toLocaleTimeString(
+                        [],
+                        {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    )}
+
+                </div>
+
+                <div class="timelineType">
+                    ${event.type}
+                </div>
+
+                <div class="timelineDetails">
+                    ${event.details}
+                </div>
+            `;
+
+
+            timeline.appendChild(
+                div
+            );
+        }
+    );
+}
+
+
+
+// ====================================
+// OBSERVATION ENTRY
+// ====================================
+
+// symptom sliders
+// getRating()
+
+function getRating(id) {
+
+    if (!ratedSymptoms.has(id)) {
+        return -1;
+    }
+
+    return Number(
+        document.getElementById(id).value
+    );
+}
+
+function initializeSymptomSliders() {
+
+    symptomSliders.forEach(
+        function (id) {
+
+            const slider =
+                document.getElementById(id);
+
+            const valueDisplay =
+                document.getElementById(
+                    id + "Value"
+                );
+
+            slider.value = 5;
+
+            slider.classList.add(
+                "unratedSlider"
+            );
+
+            valueDisplay.textContent = "—";
+
+            slider.addEventListener(
+                "input",
+                function () {
+
+                    ratedSymptoms.add(id);
+
+                    slider.classList.remove(
+                        "unratedSlider"
+                    );
+
+                    valueDisplay.textContent =
+                        slider.value;
+
+                    saveButton.disabled = false;
+                }
+            );
+        }
+    );
+}
+
+function resetSymptomSliders() {
+
+    ratedSymptoms.clear();
+
+    symptomSliders.forEach(
+        function (id) {
+
+            const slider =
+                document.getElementById(id);
+
+            const valueDisplay =
+                document.getElementById(
+                    id + "Value"
+                );
+
+            slider.value = 5;
+
+            slider.classList.add(
+                "unratedSlider"
+            );
+
+            valueDisplay.textContent = "—";
+        }
+    );
+}
+// saveEntry()
 
 async function saveEntry() {
-        alert("Saving Entry");
-let weather = null;
+    alert("Saving Entry");
+    let weather = null;
 
     try {
 
@@ -390,7 +719,7 @@ let weather = null;
 
         balance: getRating("balance"),
 
-        dyskinesia: getRating("dyskinesia"),
+        dystonia: getRating("dystonia"),
 
         depression:
             getRating("depression"),
@@ -406,6 +735,8 @@ let weather = null;
 
         energy:
             getRating("energy"),
+
+        sleepiness: getRating("sleepiness"),
 
         dbsProgram:
             dbsProgram.value,
@@ -432,8 +763,17 @@ let weather = null;
         }
     );
 
-    const entries =
-        getEntries();
+    const entries = getEntries();
+
+
+
+function saveEntries(entries) {
+
+    localStorage.setItem(
+        "parkinsonsLogEntries",
+        JSON.stringify(entries)
+    );
+}
 
 
     entries.push(entry);
@@ -454,16 +794,57 @@ let weather = null;
     setCurrentDateTime();
 }
 
+    dbsPulseWidth.addEventListener(
+        "input",
+        saveDBSSettings
+    );
 
-saveButton.addEventListener(
-    "click",
-    saveEntry
-);
-//*****************************************************************
-// ------------------------------------
-// Medication
-// ------------------------------------
+    dbsFrequency.addEventListener(
+        "input",
+        saveDBSSettings
+    );
 
+function getEntries() {
+
+    const savedEntries =
+        localStorage.getItem(
+            "parkinsonsLogEntries"
+        );
+
+    if (!savedEntries) {
+        return [];
+    }
+
+    return JSON.parse(savedEntries);
+}
+
+
+// clearCurrentEntry()
+
+function clearCurrentEntry() {
+
+    resetSymptomSliders();
+
+    notes.value = "";
+
+    saveButton.disabled = true;
+
+    setCurrentDateTime();
+}
+
+// ====================================
+// DBS
+// ====================================
+
+// remember current program/level
+// restore DBS settings
+
+
+// ====================================
+// MEDICATION
+// ====================================
+
+// getMedicationEvents()
 function getMedicationEvents() {
 
     const saved =
@@ -477,13 +858,16 @@ function getMedicationEvents() {
 
     return JSON.parse(saved);
 }
-
+// saveMedicationEvent()
 
 function saveMedicationEvent(
     medication
 ) {
 
-    const now = new Date();
+     const medicationTime =
+        new Date(
+            `${entryDate.value}T${entryTime.value}`
+        );
 
     const event = {
 
@@ -491,19 +875,19 @@ function saveMedicationEvent(
             medication,
 
         timestamp:
-            now.toISOString(),
+            medicationTime.toISOString(),
 
-         date:
+        date:
             entryDate.value,
 
         time:
-            entryTime.value,
-
+            entryTime.value
     };
 
-
+   
     const events =
-        getMedicationEvents();
+        
+    getMedicationEvents();
 
     events.push(event);
 
@@ -516,8 +900,7 @@ function saveMedicationEvent(
         `${medication} recorded at ${event.time}`
     );
 }
-
-
+// medication button handlers
 // ------------------------------------
 // Medication button clicks
 // ------------------------------------
@@ -546,24 +929,17 @@ document
             );
         }
     );
-//***************************************************************************
+    
+    // reminders
 
 
-setCurrentDateTime();
+// ====================================
+// SLEEP
+// ====================================
 
-displayEntries();
-const startSleepButton =
-    document.getElementById("startSleepButton");
-
-const wakeButton =
-    document.getElementById("wakeButton");
-
-const sleepStatus =
-    document.getElementById("sleepStatus");
-
-const sleepList =
-    document.getElementById("sleepList");
-
+// startSleep()
+// wakeUp()
+// displaySleep()
 
 function getSleepSessions() {
 
@@ -622,39 +998,6 @@ function clearActiveSleepSession() {
     localStorage.removeItem(
         "parkinsonsActiveSleep"
     );
-}
-
-
-function formatTime(date) {
-
-    return date.toLocaleTimeString(
-        [],
-        {
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-}
-
-
-function formatDuration(
-    milliseconds
-) {
-
-    const totalMinutes =
-        Math.floor(
-            milliseconds / 60000
-        );
-
-    const hours =
-        Math.floor(
-            totalMinutes / 60
-        );
-
-    const minutes =
-        totalMinutes % 60;
-
-    return `${hours} hr ${minutes} min`;
 }
 
 
@@ -744,336 +1087,161 @@ function wakeUp() {
 }
 
 
-function displaySleep() {
 
-    const active =
-        getActiveSleepSession();
+// ====================================
+// WEATHER
+// ====================================
 
+// getCurrentPosition()
+function getCurrentPosition() {
 
-    if (active) {
+    return new Promise(
+        function (resolve, reject) {
 
-        const start =
-            new Date(
-                active.start
-            );
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
 
-        sleepStatus.textContent =
-            `Sleeping since ${formatTime(start)}`;
-    }
-    else {
+                    resolve({
+                        latitude:
+                            position.coords.latitude,
 
-        sleepStatus.textContent =
-            "No active sleep session.";
-    }
+                        longitude:
+                            position.coords.longitude
+                    });
+                },
 
+                function (error) {
 
-    const sessions =
-        getSleepSessions();
-
-
-    sleepList.innerHTML = "";
-
-
-    const newestFirst =
-        [...sessions].reverse();
-
-
-    newestFirst.forEach(
-        function (session) {
-
-            const start =
-                new Date(
-                    session.start
-                );
-
-            const end =
-                new Date(
-                    session.end
-                );
-
-            const duration =
-                end - start;
-
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.className =
-                "sleepEntry";
-
-
-            div.innerHTML = `
-                <strong>
-                    ${start.toLocaleDateString()}
-                </strong>
-
-                <br>
-
-                ${formatTime(start)}
-                →
-                ${formatTime(end)}
-
-                <br>
-
-                Duration:
-                ${formatDuration(duration)}
-            `;
-
-
-            sleepList.appendChild(
-                div
+                    reject(error);
+                }
             );
         }
     );
-}
+}// getWeatherForObservation()
+async function getWeatherForObservation(
+    latitude,
+    longitude,
+    date,
+    time
+) {
+
+    const url =
+        "https://api.open-meteo.com/v1/forecast" +
+
+        `?latitude=${latitude}` +
+
+        `&longitude=${longitude}` +
+
+        "&hourly=" +
+        "temperature_2m," +
+        "relative_humidity_2m," +
+        "dew_point_2m," +
+        "surface_pressure" +
+
+        "&temperature_unit=fahrenheit" +
+
+        "&timezone=auto" +
+
+        `&start_date=${date}` +
+
+        `&end_date=${date}`;
 
 
-startSleepButton.addEventListener(
-    "click",
-    startSleep
-);
+    const response =
+        await fetch(url);
 
 
-wakeButton.addEventListener(
-    "click",
-    wakeUp
-);
-
-
-displaySleep();
-
-const timeline =
-    document.getElementById("timeline");
-
-const refreshTimelineButton =
-    document.getElementById(
-        "refreshTimelineButton"
-    );
-
-
-function buildTimeline() {
-
-    let events = [];
-
-
-    // --------------------------------
-    // Symptom / DBS observations
-    // --------------------------------
-
-    const entries =
-        getEntries();
-
-    entries.forEach(
-        function (entry) {
-
-            const timestamp =
-                new Date(
-                    `${entry.date}T${entry.time}`
-                );
-
-            events.push({
-
-                timestamp:
-                    timestamp,
-
-                type:
-                    "SYMPTOMS / DBS",
-
-                details:
-                    `Symptoms: ${entry.overallSymptoms}/10
-                     — DBS Program: ${entry.dbsProgram || "-"}
-                     — Level: ${entry.dbsLevel || "-"}`
-            });
-        }
-    );
-        
-    dbsProgram.addEventListener(
-        "change",
-        function () {
-            saveButton.disabled = false;
-        }
-    );
-
-    notes.addEventListener(
-        "input",
-        function () {
-            saveButton.disabled = false;
-        }
-    );
-
-    dbsLevel.addEventListener(
-        "input",
-        function () {
-            saveButton.disabled = false;
-        }
-    );
-
-    // --------------------------------
-    // Medication
-    // --------------------------------
-
-    const medications =
-        getMedicationEvents();
-
-    medications.forEach(
-        function (med) {
-
-            events.push({
-
-                timestamp:
-                    new Date(
-                        med.timestamp
-                    ),
-
-                type:
-                    "MEDICATION",
-
-                details:
-                    med.medication
-            });
-        }
-    );
-
-
-    // --------------------------------
-    // Sleep
-    // --------------------------------
-
-    const sleepSessions =
-        getSleepSessions();
-
-    sleepSessions.forEach(
-        function (sleep) {
-
-            const start =
-                new Date(
-                    sleep.start
-                );
-
-            const end =
-                new Date(
-                    sleep.end
-                );
-
-            events.push({
-
-                timestamp:
-                    start,
-
-                type:
-                    "SLEEP",
-
-                details:
-                    `${formatTime(start)}
-                     → ${formatTime(end)}
-                     (${formatDuration(end - start)})`
-            });
-        }
-    );
-
-
-    // Newest event first
-
-    events.sort(
-        function (a, b) {
-
-            return (
-                b.timestamp -
-                a.timestamp
-            );
-        }
-    );
-
-
-    displayTimeline(events);
-}
-
-
-function displayTimeline(events) {
-
-    timeline.innerHTML = "";
-
-
-    if (events.length === 0) {
-
-        timeline.textContent =
-            "No events recorded yet.";
-
-        return;
+    if (!response.ok) {
+        throw new Error(
+            "Weather request failed"
+        );
     }
 
 
-    events.forEach(
-        function (event) {
+    const data =
+        await response.json();
 
-            const div =
-                document.createElement(
-                    "div"
+
+    const observationTime =
+        new Date(
+            `${date}T${time}`
+        );
+
+
+    let closestIndex = 0;
+
+    let closestDifference =
+        Infinity;
+
+
+    data.hourly.time.forEach(
+        function (weatherTime, index) {
+
+            const t =
+                new Date(weatherTime);
+
+            const difference =
+                Math.abs(
+                    t - observationTime
                 );
 
-            div.className =
-                "timelineEntry";
 
+            if (
+                difference <
+                closestDifference
+            ) {
 
-            const date =
-                event.timestamp;
+                closestDifference =
+                    difference;
 
-
-            div.innerHTML = `
-
-                <div class="timelineTime">
-
-                    ${date.toLocaleDateString()}
-
-                    ${date.toLocaleTimeString(
-                        [],
-                        {
-                            hour: "2-digit",
-                            minute: "2-digit"
-                        }
-                    )}
-
-                </div>
-
-                <div class="timelineType">
-                    ${event.type}
-                </div>
-
-                <div class="timelineDetails">
-                    ${event.details}
-                </div>
-            `;
-
-
-            timeline.appendChild(
-                div
-            );
+                closestIndex =
+                    index;
+            }
         }
     );
+
+
+    return {
+
+        temperatureF:
+            data.hourly
+                .temperature_2m[
+                    closestIndex
+                ],
+
+        humidity:
+            data.hourly
+                .relative_humidity_2m[
+                    closestIndex
+                ],
+
+        dewPointF:
+            data.hourly
+                .dew_point_2m[
+                    closestIndex
+                ],
+
+        pressureHpa:
+            data.hourly
+                .surface_pressure[
+                    closestIndex
+                ],
+
+        weatherTime:
+            data.hourly
+                .time[
+                    closestIndex
+                ]
+    };
 }
 
 
-refreshTimelineButton.addEventListener(
-    "click",
-    buildTimeline
-);
 
+// ====================================
+// GRAPH
+// ====================================
 
-buildTimeline();
-
-const symptomGraph =
-    document.getElementById(
-        "symptomGraph"
-    );
-
-const graphMetric =
-    document.getElementById(
-        "graphMetric"
-    );
-
+// drawSymptomGraph()
 
 function drawSymptomGraph() {
 
@@ -1411,284 +1579,150 @@ function drawSymptomGraph() {
 }
 
 
-graphMetric.addEventListener(
-    "change",
-    drawSymptomGraph
+// ====================================
+// SERVICE WORKER
+// ====================================
+
+// register service worker
+
+// ====================================
+// DOM WIRING / EVENT LISTENERS
+// ====================================
+
+saveButton.addEventListener(
+    "click",
+    saveEntry
 );
 
-
-drawSymptomGraph();
-
-if ("serviceWorker" in navigator) {
-
-    window.addEventListener(
-        "load",
-        function () {
-
-            navigator.serviceWorker.register(
-                "service-worker.js"
-            );
-        }
-    );
-}
-function getCurrentPosition() {
-
-    return new Promise(
-        function (resolve, reject) {
-
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-
-                    resolve({
-                        latitude:
-                            position.coords.latitude,
-
-                        longitude:
-                            position.coords.longitude
-                    });
-                },
-
-                function (error) {
-
-                    reject(error);
-                }
-            );
-        }
-    );
-}
-async function getWeatherForObservation(
-    latitude,
-    longitude,
-    date,
-    time
-) {
-
-    const url =
-        "https://api.open-meteo.com/v1/forecast" +
-
-        `?latitude=${latitude}` +
-
-        `&longitude=${longitude}` +
-
-        "&hourly=" +
-        "temperature_2m," +
-        "relative_humidity_2m," +
-        "dew_point_2m," +
-        "surface_pressure" +
-
-        "&temperature_unit=fahrenheit" +
-
-        "&timezone=auto" +
-
-        `&start_date=${date}` +
-
-        `&end_date=${date}`;
-
-
-    const response =
-        await fetch(url);
-
-
-    if (!response.ok) {
-        throw new Error(
-            "Weather request failed"
-        );
-    }
-
-
-    const data =
-        await response.json();
-
-
-    const observationTime =
-        new Date(
-            `${date}T${time}`
-        );
-
-
-    let closestIndex = 0;
-
-    let closestDifference =
-        Infinity;
-
-
-    data.hourly.time.forEach(
-        function (weatherTime, index) {
-
-            const t =
-                new Date(weatherTime);
-
-            const difference =
-                Math.abs(
-                    t - observationTime
-                );
-
-
-            if (
-                difference <
-                closestDifference
-            ) {
-
-                closestDifference =
-                    difference;
-
-                closestIndex =
-                    index;
-            }
-        }
-    );
-
-
-    return {
-
-        temperatureF:
-            data.hourly
-                .temperature_2m[
-                    closestIndex
-                ],
-
-        humidity:
-            data.hourly
-                .relative_humidity_2m[
-                    closestIndex
-                ],
-
-        dewPointF:
-            data.hourly
-                .dew_point_2m[
-                    closestIndex
-                ],
-
-        pressureHpa:
-            data.hourly
-                .surface_pressure[
-                    closestIndex
-                ],
-
-        weatherTime:
-            data.hourly
-                .time[
-                    closestIndex
-                ]
-    };
-}
-
-const clearButton =
-    document.getElementById(
-        "clearButton"
-    );
-function clearCurrentEntry() {
-
-    resetSymptomSliders();
-
-    notes.value = "";
-
-    saveButton.disabled = true;
-
-    setCurrentDateTime();
-}
 clearButton.addEventListener(
     "click",
     clearCurrentEntry
 );
 
-function scheduleMedicationReminder(
-    medication
-) {
+startSleepButton.addEventListener(
+    "click",
+    startSleep
+);
 
-    const reminderTime =
-        Date.now() +
-        (3.5 * 60 * 60 * 1000);
+wakeButton.addEventListener(
+    "click",
+    wakeUp
+);
 
-    const reminder = {
+refreshTimelineButton.addEventListener(
+    "click",
+    buildTimeline
+);
 
-        medication:
-            medication,
-
-        timestamp:
-            reminderTime
-    };
-
-
-    localStorage.setItem(
-        "medicationReminder",
-        JSON.stringify(reminder)
+const symptomGraph =
+    document.getElementById(
+        "symptomGraph"
     );
 
+const graphMetric =
+    document.getElementById(
+        "graphMetric"
+    );
 
-    startMedicationTimer();
+graphMetric.addEventListener(
+    "change",
+    drawSymptomGraph
+);
+
+startSleepButton.addEventListener(
+    "click",
+    startSleep
+);
+
+wakeButton.addEventListener(
+    "click",
+    wakeUp
+);
+
+dbsProgram.addEventListener(
+    "change",
+    saveDBSSettings
+);
+
+dbsLevel.addEventListener(
+    "input",
+    saveDBSSettings
+);
+
+function saveDBSSettings() {
+
+    const settings = {
+
+        program:
+            dbsProgram.value,
+
+        level:
+            dbsLevel.value,
+
+        pulseWidth:
+            dbsPulseWidth.value,
+
+        frequency:
+            dbsFrequency.value
+    };
+
+    localStorage.setItem(
+        "parkinsonsDBSSettings",
+        JSON.stringify(settings)
+    );
+
 }
-function startMedicationTimer() {
+
+function restoreDBSSettings() {
 
     const saved =
         localStorage.getItem(
-            "medicationReminder"
+            "parkinsonsDBSSettings"
         );
+        dbsPulseWidth.value =
+            settings.pulseWidth || "";
 
-
+        dbsFrequency.value =
+            settings.frequency || "";
     if (!saved) {
         return;
     }
 
-
-    const reminder =
+    const settings =
         JSON.parse(saved);
 
+    dbsProgram.value =
+        settings.program || "";
 
-    const delay =
-        reminder.timestamp -
-        Date.now();
-
-
-    if (delay <= 0) {
-
-        showMedicationReminder(
-            reminder.medication
-        );
-
-        return;
-    }
-
-
-    setTimeout(
-        function () {
-
-            showMedicationReminder(
-                reminder.medication
-            );
-
-        },
-        delay
-    );
+    dbsLevel.value =
+        settings.level || "";
 }
-function showMedicationReminder(
-    medication
-) {
+// ====================================
+// APPLICATION STARTUP
+// ====================================
 
-    if (
-        Notification.permission ===
-        "granted"
-    ) {
+initializeSymptomSliders();
 
-        new Notification(
-            "Medication Reminder",
-            {
-                body:
-                    `Time for ${medication}`
+setCurrentDateTime();
+displayEntries();
+displaySleep();
+buildTimeline();
+drawSymptomGraph();
+restoreDBSSettings();
+function registerServiceWorker() {
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker.register(
+                    "service-worker.js"
+                );
             }
         );
     }
-    else {
-
-        alert(
-            `Medication reminder: ${medication}`
-        );
-    }
-
-
-    localStorage.removeItem(
-        "medicationReminder"
-    );
 }
 
-startMedicationTimer();
+registerServiceWorker();

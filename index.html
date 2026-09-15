@@ -57,8 +57,7 @@
                value="0" step="1">
         <span id="stiffnessValue">0</span>
     </div>
-
-    <div class="sliderRow">
+     <div class="sliderRow">
         <label for="balance">
             Walking / Balance
         </label>
@@ -78,6 +77,17 @@
                min="0" max="10"
                value="0" step="1">
         <span id="dyskinesiaValue">0</span>
+    </div>
+
+    <div class="sliderRow">
+        <label for="dystonia">
+            Dystonia
+        </label>
+        <input type="range"
+               id="dystonia"
+               min="0" max="10"
+               value="0" step="1">
+        <span id="dystoniaValue">0</span>
     </div>
 
     <div class="sliderRow">
@@ -135,6 +145,17 @@
         <span id="energyValue">5</span>
     </div>
 
+    <div class="sliderRow">
+        <label for="sleepiness">
+            Sleepiness
+        </label>
+        <input type="range"
+               id="sleepiness"
+               min="0" max="10"
+               value="5" step="1">
+        <span id="sleepinessValue">5</span>
+    </div>
+
 </section>
         <section class="card">
 
@@ -148,24 +169,24 @@
             </div>
 
         </section>
-       
-<div class="entryButtons">
+        
+<div class="card">
 
-    <button
-        id="clearButton"
-        type="button">
-        Reset Entry
-    </button>
+        <button
+            id="clearButton"
+            type="button">
+            Reset Entry
+        </button>
 
-    <button
-        id="saveButton"
-        type="button"
-        disabled>
-        Save Entry
-    </button>
-
+        <button
+            id="saveButton"
+            type="button"
+            disabled>
+            Save Entry
+        </button>
 </div>
-<section class="card">
+    </section>
+    <section class="card">
 
     <h2>Medication</h2>
 
@@ -234,8 +255,29 @@
                     step="0.1"
                     placeholder="2.5"
                 >
+                            </div>
 
-            </div>
+<div class="row">
+    <label for="dbsPulseWidth">
+        Pulse Width (µs)
+    </label>
+
+    <input
+        type="number"
+        id="dbsPulseWidth"
+        step="1">
+</div>
+
+        <div class="row">
+            <label for="dbsFrequency">
+                Frequency (Hz)
+            </label>
+
+            <input
+                type="number"
+                id="dbsFrequency"
+                step="1">
+        </div>
 
         </section>
  
@@ -309,6 +351,10 @@
                 Dyskinesia
             </option>
 
+            <option value="dystonia">
+                Dystonia
+            </option>
+
             <option value="depression">
                 Depression
             </option>
@@ -327,6 +373,10 @@
 
             <option value="energy">
                 Energy
+            </option>
+
+           <option value="sleepiness">
+                Sleepiness
             </option>
         </select>
 
